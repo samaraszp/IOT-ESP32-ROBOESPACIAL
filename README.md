@@ -10,7 +10,7 @@ O projeto consiste no ecossistema completo de um robô explorador espacial proje
 - Ryan Luz
 - Samara Souza
 
----
+Projeto no WOKWI: https://wokwi.com/projects/464384424690153473
 
 ## 📁 Estrutura do Repositório
 
