@@ -1,0 +1,111 @@
+{
+  "version": 1,
+  "author": "Samara",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-breadboard-half", "id": "bb1", "top": -51, "left": -45.2, "attrs": {} },
+    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": -76.8, "left": -167.96, "attrs": {} },
+    {
+      "type": "wokwi-dht22",
+      "id": "dht1",
+      "top": -120,
+      "left": -20,
+      "attrs": { "temperature": "24.5", "humidity": "55" }
+    },
+    { "type": "wokwi-servo", "id": "servo1", "top": 170.8, "left": -57.6, "attrs": {} },
+    { "type": "wokwi-servo", "id": "servo2", "top": 170.8, "left": 124.8, "attrs": {} },
+    { "type": "wokwi-photoresistor-sensor", "id": "ldr1", "top": -120, "left": 90, "attrs": {} },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn1",
+      "top": 9.5,
+      "left": 61.1,
+      "rotate": 90,
+      "attrs": { "color": "grey", "xray": "1", "bounce": "0" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r2",
+      "top": 110.4,
+      "left": 57.05,
+      "rotate": 90,
+      "attrs": { "value": "10000" }
+    },
+    { "type": "wokwi-pir-sensor", "id": "pir1", "top": -130, "left": 210, "attrs": {} },
+    {
+      "type": "wokwi-led",
+      "id": "led_verde",
+      "top": -180,
+      "left": -120,
+      "attrs": { "color": "green" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led_vermelho",
+      "top": -180,
+      "left": -70,
+      "attrs": { "color": "red" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r_led1",
+      "top": -130,
+      "left": -120,
+      "rotate": 90,
+      "attrs": { "value": "220" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r_led2",
+      "top": -130,
+      "left": -70,
+      "rotate": 90,
+      "attrs": { "value": "220" }
+    },
+    {
+      "type": "wokwi-analog-joystick",
+      "id": "joystick1",
+      "top": -154.2,
+      "left": -292.2,
+      "attrs": {}
+    }
+  ],
+  "connections": [
+    [ "esp:TX", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX", "$serialMonitor:TX", "", [] ],
+    [ "esp:5V", "bb1:bp.1", "red", [ "h0.15", "v9.6" ] ],
+    [ "esp:GND.1", "bb1:bn.1", "black", [ "h-9.45", "v67.2", "h161.6" ] ],
+    [ "bb1:bp.25", "bb1:tp.25", "red", [ "v-0.9", "h20.8", "v-172.8" ] ],
+    [ "bb1:bn.25", "bb1:tn.25", "black", [ "v-1.3", "h20.8", "v-172.8" ] ],
+    [ "dht1:VCC", "bb1:tp.5", "red", [] ],
+    [ "dht1:SDA", "esp:4", "purple", [] ],
+    [ "dht1:GND", "bb1:tn.5", "black", [] ],
+    [ "servo1:V+", "bb1:bp.6", "red", [ "v-67.1", "h75.2" ] ],
+    [ "servo1:GND", "bb1:bn.6", "black", [ "v-57.6", "h75.2" ] ],
+    [ "servo1:PWM", "esp:27", "gold", [ "h-9.6", "v-67", "h-124.8", "v-124.8" ] ],
+    [ "servo2:V+", "bb1:bp.21", "red", [] ],
+    [ "servo2:GND", "bb1:bn.21", "black", [ "v-67.2", "h94.4" ] ],
+    [ "servo2:PWM", "esp:25", "gold", [ "h-9.6", "v-67", "h-297.6", "v-144" ] ],
+    [ "bb1:12b.g", "esp:5", "violet", [ "v0", "h-144", "v-38.4" ] ],
+    [ "bb1:tp.11", "btn1:1.l", "red", [ "v0" ] ],
+    [ "ldr1:VCC", "bb1:tp.18", "red", [] ],
+    [ "ldr1:GND", "bb1:tn.18", "black", [] ],
+    [ "ldr1:AO", "esp:35", "orange", [] ],
+    [ "pir1:VCC", "bb1:tp.28", "red", [] ],
+    [ "pir1:GND", "bb1:tn.28", "black", [] ],
+    [ "pir1:OUT", "esp:14", "purple", [] ],
+    [ "r_led1:1", "esp:12", "green", [] ],
+    [ "r_led1:2", "led_verde:A", "green", [] ],
+    [ "led_verde:C", "bb1:tn.2", "black", [] ],
+    [ "r_led2:1", "esp:13", "red", [] ],
+    [ "r_led2:2", "led_vermelho:A", "red", [] ],
+    [ "led_vermelho:C", "bb1:tn.3", "black", [] ],
+    [ "btn1:1.l", "bb1:14t.a", "", [ "$bb" ] ],
+    [ "btn1:2.l", "bb1:12t.a", "", [ "$bb" ] ],
+    [ "btn1:1.r", "bb1:14b.f", "", [ "$bb" ] ],
+    [ "btn1:2.r", "bb1:12b.f", "", [ "$bb" ] ],
+    [ "r2:1", "bb1:12b.h", "", [ "$bb" ] ],
+    [ "r2:2", "bb1:bn.10", "", [ "$bb" ] ]
+  ],
+  "dependencies": {}
+}
