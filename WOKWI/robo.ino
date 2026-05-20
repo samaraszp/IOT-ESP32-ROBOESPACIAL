@@ -1,24 +1,22 @@
-// Wi-fi e whatsapp
+// Wifi e whatsapp
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <UrlEncode.h>
 
-// Mandar mensagem para Whatsapp
-// +international_country_code + phone number
+// Mensagem para whatsapp
 String phoneNumber = "+557186378606";
 String apiKey = "4740574";
 
-void sendMessage(String message){
+// URL do Backend Python
+// No Wokwi para acessar o localhost da máquina local usa o IP 10.0.1.2
+String serverUrl = "http://10.0.1.2:8000/leituras";
 
-  // Data to send with HTTP POST
+void sendMessage(String message){
   String url = "https://api.callmebot.com/whatsapp.php?phone=" + phoneNumber + "&apikey=" + apiKey + "&text=" + urlEncode(message);    
   HTTPClient http;
   http.begin(url);
-
-  // Specify content-type header
   http.addHeader("Content-Type", "application/x-www-form-urlencoded");
  
-  // Send HTTP POST request
   int httpResponseCode = http.POST(url);
   if (httpResponseCode == 200){
     Serial.print("Message sent successfully");
@@ -28,8 +26,36 @@ void sendMessage(String message){
     Serial.print("HTTP response code: ");
     Serial.println(httpResponseCode);
   }
-
   http.end();
+}
+
+// Função para enviar os dados para o Banco de Dados via API Python
+void enviarDadosServidor(float t, float h, float l, int p, float prob) {
+  if (WiFi.status() == WL_CONNECTED) {
+    HTTPClient http;
+    http.begin(serverUrl);
+    http.addHeader("Content-Type", "application/json");
+
+    
+    String jsonPayload = "{\"temperatura_c\":" + String(t) + 
+                         ",\"umidade_pct\":" + String(h) + 
+                         ",\"luminosidade\":" + String(l) + 
+                         ",\"presenca\":" + String(p) + 
+                         ",\"probabilidade_vida\":" + String(prob) + "}";
+
+    int httpResponseCode = http.POST(jsonPayload);
+    
+    if (httpResponseCode > 0) {
+      Serial.print("Dados enviados ao servidor. Código de resposta: ");
+      Serial.println(httpResponseCode);
+    } else {
+      Serial.print("Falha ao enviar dados via HTTP POST: ");
+      Serial.println(httpResponseCode);
+    }
+    http.end();
+  } else {
+    Serial.println("Erro: Wi-Fi desconectado. Não foi possível enviar os dados.");
+  }
 }
 
 // Sensor de temperatura e humidade
@@ -37,10 +63,10 @@ void sendMessage(String message){
 const int DHT_PIN = 4;
 #define DHTTYPE DHT22
 DHT dht(DHT_PIN, DHTTYPE);
-float temp;
-float hum;
+float temp; 
+float hum; 
 
-// Mortor servoPWM analogWrite
+// Mortor servo PWM
 #include <ESP32Servo.h>
 const int SERVO1_PIN = 27;
 const int SERVO2_PIN = 25;
@@ -70,19 +96,18 @@ bool msgEnviada = false;
 // Interrupcao
 const int BOTAO_PIN = 5;
 volatile bool sistema_ativo = true;
-bool ultimo_estado = true;  // Armazena o estado anterior
+bool ultimo_estado = true;  
 
 void IRAM_ATTR handleButtonInterrupt() {
-  sistema_ativo = !sistema_ativo;  // Inverte o estado atual liga ou desligg
+  sistema_ativo = !sistema_ativo;  
 }
 
 // Timer
-unsigned long previousMillis = 0;
-const long interval = 2000;        // Intervalo para leitura dos sensores de 2s
+unsigned long previousMillis = 0; 
+const long interval = 2000;        
 
 void setup() {
   Serial.begin(115200);
-
   dht.begin();
 
   servo1.attach(SERVO1_PIN, 500, 2400);
@@ -106,12 +131,10 @@ void setup() {
   pinMode(BOTAO_PIN, INPUT);
   attachInterrupt(digitalPinToInterrupt(BOTAO_PIN), handleButtonInterrupt, RISING);
 
-  // Send Message to WhatsAPP
   sendMessage("Um olá do ESP32 para vocês, Laura e Samara!");
 }
 
 void lerTempUmid() {
-
   hum = dht.readHumidity();
   temp = dht.readTemperature();
 
@@ -165,7 +188,7 @@ void processarLogicaRobo() {
     probabilidade_vida += 30;
   }
 
-  Serial.print("Valor calculated da probabilidade de vida (%): ");
+  Serial.print("Valor calculado da probabilidade de vida (%): ");
   Serial.print(probabilidade_vida);
   Serial.println("%");
 
@@ -186,17 +209,17 @@ void processarLogicaRobo() {
       msgEnviada = true;
     }
   }
+
+  // Executa o envio dos dados em tempo real p o banco de dados
+  enviarDadosServidor(temp, hum, lux, (presenca ? 1 : 0), (float)probabilidade_vida);
 }
 
 void loop() {
-  unsigned long inicio = millis();
-  // Verifica se houve mudança de estado
   if (sistema_ativo != ultimo_estado) {
     ultimo_estado = sistema_ativo;
 
     if (sistema_ativo) {
       Serial.println("Sistema ligado.");
-      // Reanexar os servos
       servo1.attach(SERVO1_PIN, 500, 2400);
       servo2.attach(SERVO2_PIN, 500, 2400);
     } else {
@@ -207,16 +230,14 @@ void loop() {
       digitalWrite(LED_VERMELHO_PIN, HIGH);
     }
   }
-  // Se o sistema está desligado, nn faz mais nada no loop
+
   if (!sistema_ativo) {
     delay(100);
     return;
   }
 
   unsigned long currentMillis = millis();
-  // Leitura dos sensores a cada intervalo de tempo 
   if (currentMillis - previousMillis >= interval) {
-    // Salva o ultimo tempo
     previousMillis = currentMillis;
 
     lerTempUmid();
@@ -235,7 +256,4 @@ void loop() {
     servo2.write(posDegrees);
     delay(1);
   }
-  unsigned long fim = millis();
-  //Serial.print("Tempo do loop (ms): ");
-  //Serial.println(fim - inicio);
 }
